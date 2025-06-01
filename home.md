@@ -24,17 +24,51 @@ The idea is to perform an evil twin attack using a stealthy, cheap and esily dis
 
 As we are "vibe coding" we need to have a clear idea of what we want to do while also taking into consideration what can be done. This is because we dont want to let the LLM lead the programming flow and thus deviating and messing up the code more than it should (hallucination effect). It works best when we have a clear goal. As stated before we also need to take into consideration what can be done: the ESP32 is a cheap microcontroller and it cannot do complex stuff or host large websites. 
 
-Taking this into consideration we need to create a code that will make an AP on the ESP32 device and prompt the users to "login to use this network" by a push notification and a redirect to a login webpage which will be very simmilar to the Units Eventi Wifi login page. 
+Taking this into consideration we need to:
++ create a code that will make an AP with ssid "eduroam" on the ESP32 device
++ make the code prompt the users to "login to use this network" by a push notification
++ redirect to a login webpage very simmilar to the Units Eventi Wifi login page
++ save the login data onto a separate webpage hosted on the esp32 for easy access
++ give a "connection successful" notice to victim
++ *limit access to the data webpage (only attacker can access)
+
+*this is optional as it doesn't affect the attack in any way.
+
+
 
 # PREREQUISITES
 
 + ESP32 microcontroller
 + Arduino IDE
-+ LLM (ChatGPT)
-+ 
++ LLM (ChatGPT) 
++ Basic programing knowledge
++ Patience
 
 ## Initial SETUP
-We will use a cheap microcontroller called ESP32 to host the malitcious AP and gather the login data. 
+We need to configure Arduino IDE to work with the ESP32. We can do that by connecting the ESP32 microcontroller with the PC via usb. On the Arduino IDE under "Select board and port" we need to specify the correct port and for the board choose the DOIT ESP32 DEVKIT V1. 
+After having thone that we will load a simple example program that will verify that we have set up everything correctly. We can do that by clicking on:
+
+File -> Examples -> 01.Basics -> Blink 
+
+and then cliccknig the Upload button which will compile the code and upload it to the microcontroller. If everything was done right the blue LED on your device should blink every 1000ms (1s).
+
+
+## STEP 1 
+After having done the innitial setup we can now proceede with the code generation. For this project I will use ChatGPT but any LLM should suffice. 
+This is where we first run into our first problem. As you can see from the image, ChatGPT isn't very keen on writing such a piece of code when asking it directly as it has detected it as potentialy unsafe (as it should). Fortunately for us (unfortunatley for the victims) there is a quick vay of obvieting this: lying
+
+![Direct question](images/NegativeQuestion.png)
+![Direct question](images/ChatgptNegativeResponse.png)
+
+## STEP 2: lying to the LLM
+As we saw in step 1, we cannot ask it directly for the code. This is because the model is censured. We can easily fix this problem by "lying" (in this case telling the truth) to the LLM. 
+
+As it can bee seen from the image the LLM is happy to help now and we can proceed.
+The basic idea when approaching a LLM is that you don't want to bury it with details from the start. We want a solid base and only after we will work up to the details. That is why in this prompt we are not asking it to create a specific fake login website and other requirements that would complicate its job.
+
+
+![Direct question](images/PositivePromptAndResponse.png)
+
 
 Some of the key benefits are:
 
