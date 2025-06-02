@@ -183,6 +183,9 @@ void loop() {
 
 ```
 
+## STEP 4
+Now that we have a working code it is time to analyze it and modify certain aspects that will make the attack more successful. As you can see our code provides a basic html login page that isn't very convincing so we will fix that.
+
 Analyzing this 
 
 
