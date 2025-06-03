@@ -186,6 +186,20 @@ void loop() {
 ## STEP 4
 Now that we have a working code it is time to analyze it and modify certain aspects that will make the attack more successful. As you can see our code provides a basic html login page that isn't very convincing so we will fix that.
 
+Since we are quite happy with the look of the webpage we will keep the html code, but we need to add the UniTS logo which will make everything nicer. To do that we need to use SPIFFS to upload the files to the microcontroller mamory which then weill be available for the code to pull it when needed.
+
+To do so we need to install Arduino 1.8.19 IDE and a tool that allows to send files to the ESP32 using SPIFFS. 
+
+after having thone that we make the image responsive as we target diffrent devices and we finally have the final product.
+
+
+![Direct question](images/FinalWebpage.png)
+
+
+
+
+
+
 Analyzing this 
 
 
