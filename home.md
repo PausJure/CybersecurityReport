@@ -58,7 +58,7 @@ After having done the innitial setup we can now proceede with the code generatio
 This is where we first run into our first problem. As you can see from the image, ChatGPT isn't very keen on writing such a piece of code when asking it directly as it has detected it as potentialy unsafe (as it should). Fortunately for us (unfortunatley for the victims) there is a quick vay of obvieting this: lying
 
 ![Direct question](images/NegativeQuestion.png)
-![Direct question](images/ChatgptNegativeResponse.png)
+![Response](images/ChatgptNegativeResponse.png)
 
 ## STEP 2: lying to the LLM
 As we saw in step 1, we cannot ask it directly for the code. This is because the model is censured. We can easily fix this problem by "lying" (in this case telling the truth) to the LLM. 
@@ -67,7 +67,7 @@ As it can bee seen from the image the LLM is happy to help now and we can procee
 The basic idea when approaching a LLM is that you don't want to bury it with details from the start. We want a solid base and only after we will work up to the details. That is why in this prompt we are not asking it to create a specific fake login website and other requirements that would complicate its job.
 
 
-![Direct question](images/PositivePromptAndResponse.png)
+![Modified request](images/PositivePromptAndResponse.png)
 
 
 ## STEP 3
@@ -193,7 +193,7 @@ To do so we need to install Arduino 1.8.19 IDE and a tool that allows to send fi
 after having thone that we make the image responsive as we target diffrent devices and we finally have the final product.
 
 
-![Direct question](images/FinalWebpage.png)
+![Fake page](images/FinalWebpage.PNG)
 
 
 
