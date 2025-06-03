@@ -196,6 +196,8 @@ after having thone that we make the image responsive as we target diffrent devic
 ![Fake page](images/FinalWebpage.PNG)
 
 
+## STEP 5: Problem fix
+While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger. Since we did not hijjack this check, when Windows connects to Wi-Fi, it tries to access: ``` http://www.msftconnecttest.com/connecttest.txt ```. Since we are just using DNS resolution we are not handling the NCSI correctly so  we don't get a redirect.
 
 
 
