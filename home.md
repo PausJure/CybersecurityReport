@@ -209,11 +209,15 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
 
 ![Easily acessible MAC](images/mac.jpeg)
 
-Spoofing this MAC using a MAC that is known to the network enhances the stealth and credibility of the evil twin attack, making it more effective.
+  Spoofing this MAC using a MAC that is known to the network enhances the stealth and credibility of the evil twin attack, making it more effective.
 
 + Another feature we could add is to add more information about the connected devices. As more information is always useful to attackers. We do that by implementing the following lines of code:
 
 
+
+## STEP 7 (Optional): Deauthenticator
+To aid the process of users connecting to our "evil" AP we will try to send deauthentification packets to disconnect the victim from the real acess point thus increasing the probability of getting a victim to acess our "evil" AP. 
+As can be easily discovered eduraom uses WPA3 - Enterprise which is a problem since it strictly requires PMF (Protected Management Frames) which we cannot forge as we cannot sign them. But we also know that sometimes eduraom falls back onto older standards like WPA2 - Enterprise for supporting older devices. Since in WPA2 - Enterprise PMF are optional but probably turned on. None the less we can use the tool at ```https://deauther.com``` and an ESP8266 to send deauthentication packets and hopefully boost our success rate. 
 
 Analyzing this 
 
