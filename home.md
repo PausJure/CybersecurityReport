@@ -201,11 +201,17 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
       height: auto;
 ```
 
-+ While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger. Since we did not hijjack this check, when Windows connects to Wi-Fi, it tries to access: ``` http://www.msftconnecttest.com/connecttest.txt ```. Since we are just using DNS resolution we are not handling the NCSI correctly so  we don't get a redirect. To fix this we need to add handlers for the requests made by the device. We do so by adding the following code 
++ While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger. Since we did not hijjack this check, when Windows connects to Wi-Fi, it tries to access: ``` http://www.msftconnecttest.com/connecttest.txt ```. Since we are just using DNS resolution we are not handling the NCSI correctly so  we don't get a redirect. To fix this we need to add handlers for the requests made by the device. We do so by adding the following lines of code:
+  
 
 ## STEP 6: Adding features
-Now that we have a fully working rogue AP 
++ Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found as it is clearly visible on the Aruba Devices around the university. (See image)
 
+![Easily acessible MAC](images/mac.PNG)
+
+Spoofing this MAC using a MAC that is known to the network enhances the stealth and credibility of the evil twin attack, making it more effective.
+
++ Another feature we could add is to add more information about the connected devices. As more information is always useful to attackers. We do that by implementing the following lines of code:
 
 
 
