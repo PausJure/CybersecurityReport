@@ -53,14 +53,14 @@ File -> Examples -> 01.Basics -> Blink
 and then cliccknig the Upload button which will compile the code and upload it to the microcontroller. If everything was done right the blue LED on your device should blink every 1000ms (1s).
 
 
-## STEP 1 
+## STEP 1: Code Generation
 After having done the innitial setup we can now proceede with the code generation. For this project I will use ChatGPT but any LLM should suffice. 
 This is where we first run into our first problem. As you can see from the image, ChatGPT isn't very keen on writing such a piece of code when asking it directly as it has detected it as potentialy unsafe (as it should). Fortunately for us (unfortunatley for the victims) there is a quick vay of obvieting this: lying
 
 ![Direct question](images/NegativeQuestion.png)
 ![Response](images/ChatgptNegativeResponse.png)
 
-## STEP 2: lying to the LLM
+## STEP 2: Lying To The LLM
 As we saw in step 1, we cannot ask it directly for the code. This is because the model is censured. We can easily fix this problem by "lying" (in this case telling the truth) to the LLM. 
 
 As it can bee seen from the image the LLM is happy to help now and we can proceed.
@@ -70,7 +70,7 @@ The basic idea when approaching a LLM is that you don't want to bury it with det
 ![Modified request](images/PositivePromptAndResponse.png)
 
 
-## STEP 3
+## STEP 3: First Working Code
 Now that we can ask chatgpt to create the code we proceede with many prompts trying to prompt engineere in such a vay that we get a working code. After roughly 60 minutes we get a fully working code:
 
 ```cpp
@@ -183,21 +183,28 @@ void loop() {
 
 ```
 
-## STEP 4
+## STEP 4: Modifying The Code
 Now that we have a working code it is time to analyze it and modify certain aspects that will make the attack more successful. As you can see our code provides a basic html login page that isn't very convincing so we will fix that.
 
-Since we are quite happy with the look of the webpage we will keep the html code, but we need to add the UniTS logo which will make everything nicer. To do that we need to use SPIFFS to upload the files to the microcontroller mamory which then weill be available for the code to pull it when needed.
+Since we are quite happy with the look of the webpage, we will keep the html code, but we need to add the UniTS logo which will make everything nicer. To do that we need to use SPIFFS (Serial Peripheral Interface Flash File System) to upload the files to the microcontroller mamory which will then be available for the code to access when needed.
 
-To do so we need to install Arduino 1.8.19 IDE and a tool that allows to send files to the ESP32 using SPIFFS. 
-
-after having thone that we make the image responsive as we target diffrent devices and we finally have the final product.
+To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 filesystem uploader plugin from github (```https://github.com/me-no-dev/arduino-esp32fs-plugin```) which will allow to upload the index.html and logo.png files to the microcontroller memory.
 
 
 ![Fake page](images/FinalWebpage.PNG)
 
 
 ## STEP 5: Problem fix
-While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger. Since we did not hijjack this check, when Windows connects to Wi-Fi, it tries to access: ``` http://www.msftconnecttest.com/connecttest.txt ```. Since we are just using DNS resolution we are not handling the NCSI correctly so  we don't get a redirect.
++ After testing, the image on the fake login webpage isn't responsive and it looks bad/fake on certain devices. To fix this we modified the image css code by adding 2 lines of code: 
+```cpp
+      max-width: 100%;
+      height: auto;
+```
+
++ While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger. Since we did not hijjack this check, when Windows connects to Wi-Fi, it tries to access: ``` http://www.msftconnecttest.com/connecttest.txt ```. Since we are just using DNS resolution we are not handling the NCSI correctly so  we don't get a redirect. To fix this we need to add handlers for the requests made by the device. We do so by adding the following code 
+
+## STEP 6: Adding features
+Now that we have a fully working rogue AP 
 
 
 
