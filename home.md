@@ -207,7 +207,7 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
 ## STEP 6: Adding features
 + Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found as it is clearly visible on the Aruba Devices around the university. (See image)
 
-![Easily acessible MAC](images/mac.PNG)
+![Easily acessible MAC](images/mac.jpeg)
 
 Spoofing this MAC using a MAC that is known to the network enhances the stealth and credibility of the evil twin attack, making it more effective.
 
