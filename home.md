@@ -215,6 +215,8 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
   const char* ssid = "eduroam ";  // Evil Twin SSID
   ```
   Making it look different to windows but the same to users.
+
+![Before/After ssid](images/ssid.jpg)
   
 ## STEP 6: Adding features
 + Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found by using a tool like WifiInfoView by Nirsoft. Spoofing the MAC address that is known to the network enhances the stealth and credibility of the evil twin attack, making it possibly more effective. We do this by adding:
