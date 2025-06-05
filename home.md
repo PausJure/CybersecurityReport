@@ -201,20 +201,37 @@ To do so we need to install Arduino 1.8.19 IDE and download the Arduino ESP32 fi
       height: auto;
 ```
 
-+ While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger and the fact that it seems that the DNS server address needs to be set to be determined automatically otherwise the redirection doesn't work (at least on windows since if the dns server address is set manually the victim tries to contact always that server and since our evil AP doesn't allow internet connectivity the dns requests cannot get resolved by our dns and the redirect doesn't work).
++ While testing the attack I notied that newer windows 10 versions (22H2) don't prompt the user to login automatically while older windows versions like 19H1 and 19H2 do. After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger and the fact that it seems that the DNS server address needs to be set to be determined automatically otherwise the redirection doesn't work (at least on windows since if the dns server address is set manually the victim tries to contact always that server and since our evil AP doesn't allow internet connectivity the dns requests cannot get resolved by our dns and the redirect doesn't work). This was fixed by implementing the CaptivePortal example provided by the ESP32 example library directly into our code.
 
-+ Another problem we can try to fix is that on windows if there already is a network with the same ssid our AP will be named eduroam 2 thus making it more suspicious. To fix that we need to 
++ When windows recognizes 2 APs with the same ssid they get renamed. That means that our eduroam AP will appear as eduroam 2 on victim's devices if they already used the real eduroam (probably the case). This makes our attack more suspicious so to fix it we will add a character that will make it different from the original eduroam. So from:
 
+  ```cpp
+  const char* ssid = "eduroam";  // Evil Twin SSID
+  ```
+  
+  We modify it by adding a space at the end like so:
+
+  ```cpp
+  const char* ssid = "eduroam ";  // Evil Twin SSID
+  ```
+  Making it look different to windows but the same to users.
+  
 ## STEP 6: Adding features
-+ Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found as it is clearly visible on the Aruba Devices around the university. (See image)
++ Now that we have a fully working rogue AP we can add the ability for the ESP32 to spoof it's MAC address to the MAC address of a real AP in the university. This MAC address can be easily found by using a tool like WifiInfoView by Nirsoft. Spoofing the MAC address that is known to the network enhances the stealth and credibility of the evil twin attack, making it possibly more effective. We do this by adding:
 
-![Easily acessible MAC](images/mac.jpeg)
+```cpp
+  uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
+  esp_wifi_set_mac(WIFI_IF_AP, customMAC);
+```
 
-  Spoofing this MAC using a MAC that is known to the network enhances the stealth and credibility of the evil twin attack, making it more effective.
-
-+ Another feature we could add is to add more information about the connected devices. As more information is always useful to attackers. We do that by implementing the following lines of code:
-
-
+after configuring the AP IP settings: 
+```cpp  
+WiFi.softAPConfig(apIP, apIP, netMsk);
+```
+and before setting the ssid: 
+```cpp
+WiFi.softAP(ssid);
+```
 
 ## STEP 7 (Optional): Deauthenticator
 To aid the process of users connecting to our "evil" AP we will try to send deauthentification packets to disconnect the victim from the real acess point thus increasing the probability of getting a victim to acess our "evil" AP. 
