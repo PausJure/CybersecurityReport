@@ -287,7 +287,7 @@ Guide:
 STEP 8 (OPTIONAL): Deauthenticator
 To aid the process of users connecting to our evil twin AP we will try to send deauthentication packets to disconnect the victim from the real acess point, thus increasing the probability of getting a victim to connect to our "evil" AP. 
 As we easily discovered, by looking at the wifi settings on android and windows, eduraom uses WPA3 - Enterprise which poses a problem since it strictly requires PMF (Protected Management Frames) which we cannot forge as we cannot sign them. 
-But we also know that sometimes eduraom falls back onto older standards like WPA2 - Enterprise for supporting older devices. Since in WPA2 - Enterprise specification PMF are optional so we can try to use the tool at ```https://deauther.com``` and an ESP8266 to send deauthentication packets and hopefully boost our success rate. 
+But we also know that sometimes eduraom falls back onto older standards like WPA2 - Enterprise for supporting older devices. Since in WPA2 - Enterprise specification PMF are optional, we can try to use the tool at ```https://deauther.com``` and an ESP8266 to send deauthentication packets to victims and hopefully boost our success rate by disconnecting users from the real AP. 
 
 We expect that this won't do anything in terms of increasing our success rate since the PMF option is most likely turned on.
 
