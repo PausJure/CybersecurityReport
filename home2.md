@@ -242,7 +242,42 @@ After looking it up, the root cause seems to be the NCSI (Network Connectivity S
   ```
   Making it look different to windows but the same to users.
 
-![Before/After ssid](images/ssid.jpg)
+  ![Before/After ssid](images/ssid.jpg)
 
 
+## STEP 7: MAC spoofing
+Now that we have a fully working Evil Twin AP, we can add the ability for the ESP32 to spoof MAC adresses. This allows us to use a legitimate MAC address of a real AP in the university as our MAC address. 
+Spoofing the MAC address that is already known to the network, and thus to devices connected to it, enhances the stealth and credibility of the evil twin attack making it possibly more effective since it will create confusion between victim devices and thus helping us in acheeving iour goals.
+
+We can esily obtain a legitimate MAC address by using a tool like WifiInfoView by Nirsoft while in range of the eduroam Wifi network. 
+
+To make use of this, we need to add the following lines of code;
+```cpp
+uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
+esp_wifi_set_mac(WIFI_IF_AP, customMAC);
+```
+just before the line where our ssid is set (```WiFi.softAP(ssid);```) and afterthe line that is configuring the AP IP settings (```WiFi.softAPConfig(apIP, apIP, netMsk);```)
+
+
+
+## STEP 7: Generalizing the code and providing a guide to use it
+Now that the specific code is working we proceed by generalizing the code so it can be easily adapted for other purposes (not just eduroam) and we provide a short guide on how to use it down below.
+
+Code:
+```cpp
+
+```
+
+
+Guide: 
++ Install the Legacy Arduino IDE v1.8.19
++ Set up the Arduino ESP32 filesystem uploader plugin (```https://github.com/me-no-dev/arduino-esp32fs-plugin```)
++ Create a folder
++ Inside the folder create a .txt file and a folder called data
++ Copy the code and paste it in a txt file
++ Modify the code according to your necesities
++ Save the file and rename it to something.ino
++ Open the .ino file with the Legacy Arduino IDE
++ Under tools select Tools > ESP32 Sketch Data Upload
++ Upload the code to the ESP32
 
