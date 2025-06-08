@@ -1,5 +1,5 @@
 # Developing an ESP32 EvilTwin attack tool using ChatGPT
-![Photo of Mountain](images/mountains.jpeg)
+![¸Two ESP32 and ESP8266](images/mountains.jpeg)
 ## Preface
 
 
