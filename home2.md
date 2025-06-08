@@ -11,7 +11,7 @@ This brings us to the goal of this report: a student with general knowledge in c
 
 
 ## Introduction
-The idea is to leverage the use of ChatGPT and build a generic EvilTwin attack tool. To do so, we will first focus on building it for a specific purpose, in this case attacking UniTS. We will then proceed with generalizing the code and instructions to create a general tool for ESP32 devices. 
+The idea is to leverage the use of ChatGPT and build a generic EvilTwin attack tool. To do so, we will first focus on building it for a specific purpose, in this case attacking UniTS. We will then proceed with generalizing the code and building instructions to use this tool on ESP32 devices. 
 
 We will exploit the fact that users often get random disconnections from eduroam and try to connect to it manually. 
 This is most noticeable in areas near the dining hall as eduroam doesn't fully cover it, or during class where professors under the pressure of time try to connect unsuccessfully to the eduroam wifi, only to give up and choose a wired connection and get prompted to login while simultaneously blaming the university or eduroam itself for the unnecessary authentication checkup. 
