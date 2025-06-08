@@ -25,7 +25,7 @@ It is this last experience where this idea came from.
 
 The idea is to create a generic tool for performing evil twin attacks using the ESP32 microcontroller. To do so, we will first "exploit" an LLM (in this case, ChatGPT) to get a working code that performs an evil twin attack on the University of Trieste that we will later generalise and build the necessary instructions for using the tool.
 
-To program the ESP32 microcontroller, we will use the Arduino IDE (2.3.6) as it is an easy and effective way to program the ESP32. We will also need to use the Legacy Arduino IDE (1.8.19) as we will need a tool called "Arduino ESP32 filesystem uploader plugin" (```https://github.com/me-no-dev/arduino-esp32fs-plugin```), which isn't compatible with the latest versions of arduino IDE. We could use just the legacy IDE but the new one is faster and more powerful; thus, we will mostly use that one to compile and upload our code to the ESP32.
+To program the ESP32 microcontroller, we will use the Arduino IDE (2.3.6) as it is an easy and effective way to program the ESP32. We will also need to use the Legacy Arduino IDE (1.8.19) as we will need a tool called "[Arduino ESP32 filesystem uploader plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin)", which isn't compatible with the latest versions of arduino IDE. We could use just the legacy IDE but the new one is faster and more powerful; thus, we will mostly use that one to compile and upload our code to the ESP32.
 
 As we will be "Vibe Coding" we need to have a clear idea of what we want to do while also taking into consideration what can be done. This is because we don't want to let the LLM lead the programming flow and thus deviate and mess up the code more than it should (LLM hallucination). It works best when we have a clear goal. 
 
@@ -49,7 +49,7 @@ Having this in mind, we will ask ChatGPT to create lightweight copies of the log
 + ESP32 microcontroller
 + Arduino IDE (Latest)
 + Arduino Legacy IDE (1.8.19)
-+ Arduino ESP32 filesystem uploader plugin (```https://github.com/me-no-dev/arduino-esp32fs-plugin```)
++ [Arduino ESP32 filesystem uploader plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin)
 + LLM (ChatGPT)
 + Basic programming knowledge
 + ESP 8266*
@@ -207,7 +207,7 @@ This problem will be polished later.
 ## STEP 5: Modifying The Code
 Now that we have a working code, it is time to analyse it and modify certain aspects that will make the attack more successful. As stated earlier, our code provides a basic login page that isn't very convincing, so we will fix that.
 
-Since we are quite happy with the look of the webpage, we will keep the HTML code, but we need to add the UniTS logo, which will make everything nicer. To do that we need to make use of SPIFFS (Serial Peripheral Interface Flash File System) on the ESP32 by using the Arduino ESP32 filesystem uploader plugin for the Legacy Arduino IDE (1.8.19) (```https://github.com/me-no-dev/arduino-esp32fs-plugin```) to upload the files to the microcontroller mamory which will then be available for the code to access when needed.
+Since we are quite happy with the look of the webpage, we will keep the HTML code, but we need to add the UniTS logo, which will make everything nicer. To do that we need to make use of SPIFFS (Serial Peripheral Interface Flash File System) on the ESP32 by using the [Arduino ESP32 filesystem uploader plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin) for the Legacy Arduino IDE (1.8.19) to upload the files to the microcontroller mamory which will then be available for the code to access when needed.
 
 To do that, we follow this guide, ```https://github.com/me-no-dev/arduino-esp32fs-plugin``` and we'll set up the plugin. After setting it up, we restart the Legacy Arduino IDE v1.8.19 and create a folder named data in our Arduino project folder. The data folder is the one where we will store our index.html fake login page and other files required by index.html, like logo.png.  
 
@@ -218,13 +218,6 @@ Having done that, we proceed with our "Vibe Coding" as usual. The result can be 
 
 ## STEP 6: Fixing Problems
 While testing, the following problems were found and fixed:
-
-+ The image on the fake login webpage Wasn't responsive, and it looked bad/fake on certain devices. To fix this we modified the image CSS code by adding 2 lines of code in the image CSS block.
-
-```cpp
-      max-width: 100%;
-      height: auto;
-```
 
 + While testing the attack, we noticed that newer windows 10 versions (22H2) don't prompt the user to log in automatically, while older Windows versions like 19H1 and 19H2 do.
 After looking it up, the root cause seems to be the NCSI (Network Connectivity Status Indicator) trigger and the fact that it seems that the DNS server address needs to be set to be determined automatically on the victims' device; otherwise, the redirection doesn't work (since if the DNS server address is set manually the victim always tries to contact the manualy set DNS server, thus ignoring our one and subsequently failing the NCSI requirements and thus not redirecting us automatically to the fake login page.
@@ -260,7 +253,7 @@ To make use of this, we need to add the following lines of code:
 uint8_t customMAC[] = { 0x9C, 0x8C, 0xD8, 0xC9, 0xCA, 0x50 }; // Replace with target MAC
 esp_wifi_set_mac(WIFI_IF_AP, customMAC);
 ```
-just before the line where our SSID is set ```WiFi.softAP(ssid);``` and after the line that is configuring the AP IP settings ```WiFi.softAPConfig(apIP, apIP, netMsk);```
+just before the line where our SSID is set: ```WiFi.softAP(ssid);``` and after the line that is configuring the AP IP settings: ```WiFi.softAPConfig(apIP, apIP, netMsk);```
 
 
 
@@ -412,7 +405,7 @@ ISSUES:
 
 ### Guide: 
 + Install the Legacy Arduino IDE v1.8.19
-+ Set up the Arduino ESP32 filesystem uploader plugin (```https://github.com/me-no-dev/arduino-esp32fs-plugin```)
++ Set up the [Arduino ESP32 filesystem uploader plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin)
 + Create a folder
 + Inside the folder create a .txt file with the same name as the parent folder and a folder called "data"
 + Copy the code we just provided and paste it in the .txt file
@@ -427,6 +420,7 @@ ISSUES:
 
 ## STEP 9 (OPTIONAL): Deauthenticator
 To aid the process of users connecting to our evil twin AP, we can try to send deauthentication packets to disconnect the victim from the real access point, thus increasing the probability of getting a victim to connect to our "evil AP". 
+
 Unfortunately, as we easily discovered by looking at the WiFi settings on Android and Windows, eduraom uses WPA3-Enterprise, which poses a problem since it strictly requires PMF (Protected Management Frames), which we cannot forge as we cannot sign them. 
 But we also know that sometimes eduroam falls back onto older standards like WPA2-Enterprise for supporting older devices. Since in the WPA2 - Enterprise specification PMF are optional, we could try to use the tool ```https://deauther.com``` and an ESP8266 to send deauthentication packets to victims and hopefully boost our success rate by disconnecting users from the real AP. 
 
@@ -442,6 +436,7 @@ While stronger devices and other methods to forge PMFs could be explored, that i
 + [ESP8266 Deauther](https://deauther.com/)
 + [WPA3 Specification](https://www.wi-fi.org/system/files/WPA3%20Specification%20v3.4.pdf)
 + [WiFI Alliance on PMFs](https://www.wi-fi.org/beacon/philipp-ebbecke/protected-management-frames-enhance-wi-fi-network-security)
++ [WifiInfoView by Nirsoft](https://www.nirsoft.net/utils/wifi_information_view.html)
 
 
 
