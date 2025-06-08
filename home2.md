@@ -435,7 +435,13 @@ While stronger devices and other methods to forge PMFs could be explored, that i
 
 
 
-
+## REFERENCES
++ [ChatGPT conversation](https://chatgpt.com/share/6845c69a-1494-800a-9eff-6a1886c53301)
++ [Arduino (Legacy) IDE](https://www.arduino.cc/en/software/)
++ [Arduino ESP32 filesystem uploader plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin)
++ [ESP8266 Deauther](https://deauther.com/)
++ [WPA3 Specification](https://www.wi-fi.org/system/files/WPA3%20Specification%20v3.4.pdf)
++ [WiFI Alliance on PMFs](https://www.wi-fi.org/beacon/philipp-ebbecke/protected-management-frames-enhance-wi-fi-network-security)
 
 
 
