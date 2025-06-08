@@ -1,7 +1,7 @@
 # Developing an ESP32 EvilTwin attack tool using ChatGPT
 
 ## Preface
-![Photo of Mountain](images/mountain.jpg)
+![Photo of Mountain](images/mountains.jpeg)
 
 With the rise of LLMs many things changed. One of those things is coding; users that previously didn't know how to code can now use natural language to prompt LLMs to generate relatively complex code. This code more often than not doesn't comply with industry standards in terms of quality/security but it is much better than what someone with basic knowledge in coding could do by himself. (Not to mention the time saved)
 
