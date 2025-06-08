@@ -30,13 +30,7 @@ To program the ESP32 microcontroller, we will use the Arduino IDE (2.3.6) as it 
 As we will be "Vibe Coding" we need to have a clear idea of what we want to do while also taking into consideration what can be done. This is because we don't want to let the LLM lead the programming flow and thus deviate and mess up the code more than it should (LLM hallucination). It works best when we have a clear goal. 
 
 We also need to take into consideration what can be done: the ESP32 is a cheap microcontroller, and it cannot do complex tasks. 
-
-What we cannot do :  
-+ Host large websites
-+ Perform deauthentication using management frames
-
-
-Taking this into consideration, we will ask ChatGPT to create lightweight copies of the login HTML pages used by the university APs. Also we won't try to use deauthentication*, but we will instead leverage the random disconnections and limited coverage of the eduroam network on the campus.
+Having this in mind, we will ask ChatGPT to create lightweight copies of the login HTML pages used by the university APs. Also we won't try to use deauthentication*, but we will instead leverage the random disconnections and limited coverage of the eduroam network on the campus.
 
 
 
