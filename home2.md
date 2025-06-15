@@ -428,6 +428,18 @@ We expect that this won't do anything in terms of increasing our success rate si
 While stronger devices and other methods to forge PMFs could be explored, that is beyond the scope of this demo.
 
 
+## Login Process Explained
+
+![Login Process](images/LoginProcess.jpg)
+
+Once the ESP32 device is powered on and loaded with the code, the user will see 2 networks called "eduroam": one with a lock symbol (the real eduroam AP) and one that is an open network (our fake eduroam AP). If the user by mistake tries to connect to the fake AP, he will get prompted to provide credentials, as you can see in the left image. Once he enters the credentials and clicks to log in, he is redirected to a fake html massage stating that he can now use eduroam, which is NOT true! 
+The user just sent the credential to our ESP32 device, which has stored them in a string that can be viewed by the adversary, as can be seen in the far-right screenshot.
+
+The important thing to understand here is that we are not authenticating with eduroam in any way, shape or form. As a matter of fact, during this whole process we didn't interact with the real eduroam AP.
+
+We connected to the wrong WiFi network that mimics the real one and collects our input data. The "Authentication successful. You may now use eduroam" message is fake and induces us into thinking wrongly that we authenticated with eduroam while storing our credentials. 
+ 
+
 
 ## REFERENCES
 + [ChatGPT conversation](https://chatgpt.com/share/6845c69a-1494-800a-9eff-6a1886c53301)
